@@ -34,8 +34,15 @@ const getRoleById = async(req,res)=>{
     })
 }
 
+const getRoleByName  = async(req , res) => {
+    const foundRole = await roleModel.findOne({name:req.params.name})
+    res.json({
+        data:foundRole
+    })
+}
+
 
 //object export 
 module.exports = {
-    getAllRoles,addRole,deleteRole,getRoleById
+    getAllRoles,addRole,deleteRole,getRoleById , getRoleByName
 }
