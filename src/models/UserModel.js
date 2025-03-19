@@ -23,11 +23,11 @@ const userSchema = new Schema({
         required: true,
         // maxlength: 255
     },
-    role: {
-        type: String,
-        enum: ['customer', 'agency'],
-        required: true
-    },
+    // role: {
+    //     type: String,
+    //     enum: ['customer', 'agency'],
+    //     required: true
+    // },
     roleId:{
         type:Schema.Types.ObjectId,
         ref:"roles"

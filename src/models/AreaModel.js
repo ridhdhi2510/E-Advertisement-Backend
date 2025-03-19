@@ -18,7 +18,7 @@ const areaSchema = new Schema({
     pincode:{
         type: Number,
         required: true,
-        unique: true
+        // unique: true
     }
 },{
     timestamps: true
