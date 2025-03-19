@@ -1,0 +1,6 @@
+Role(User(client),Agent,Admin) ----> add, getAll, getById, deleteById
+User(Client) ----> signup(add), login, getAll, getById, deleteById
+states ----> add, getAll
+city ----> add, getAll, getByStateId
+area ----> add , getAll, getByCityId
+hoarding ----> add, getAll, addHordingWithFile
