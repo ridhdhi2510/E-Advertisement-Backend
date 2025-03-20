@@ -1,6 +1,6 @@
 const mailer = require('nodemailer');
 
-const sendingMail = async(to, subject, text) =>{
+const sendingMail = async(to, subject, html) =>{
 
     const transporter = mailer.createTransport({
         service : "gmail",
@@ -14,7 +14,7 @@ const sendingMail = async(to, subject, text) =>{
         from: "living.in.era@gmail.com",
         to:to,
         subject: subject,
-        text:text
+        html:html
     }
 
     const mailResponse = await transporter.sendMail(mailOptions);
