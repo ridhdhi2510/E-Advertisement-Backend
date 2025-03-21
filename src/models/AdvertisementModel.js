@@ -24,17 +24,17 @@ const advertisementSchema = new Schema({
         },
         stateId:{
             type: Schema.Types.ObjectId,
-            ref: 'State',
+            ref: 'state',
             required: true
         },
         cityId:{
             type: Schema.Types.ObjectId,
-            ref: 'City',
+            ref: 'city',
             required: true
         },
         areaId:{
             type: Schema.Types.ObjectId,
-            ref: 'Area',
+            ref: 'area',
             required: true
         },
         // duration:{
@@ -62,4 +62,4 @@ const advertisementSchema = new Schema({
     timestamps: true
 })
 
-module.exports = mongoose.model("Advertisement",advertisementSchema)
+module.exports = mongoose.model("advertisement",advertisementSchema)
