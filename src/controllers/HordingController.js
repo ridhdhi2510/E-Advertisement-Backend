@@ -137,5 +137,25 @@ const addHordingWithFile = async (req, res) => {
     }
   }
 
+//get hording by location
+const getHordingsByLocation = async (req, res) => {
+  try {
+    const { stateId, cityId, areaId } = req.query;
+    const query = {};
+    if (stateId) query.stateId = stateId;
+    if (cityId) query.cityId = cityId;
+    if (areaId) query.areaId = areaId;
 
-module.exports = { addHording, getAllHordings, addHordingWithFile , getAllHordingsByUserId, updateHording, getHordingById };
+    const hordings = await hordingModel.find(query)
+      .populate("stateId", "name")
+      .populate("cityId", "name")
+      .populate("areaId", "name");
+
+    res.status(200).json({ message: "Filtered hoardings fetched", data: hordings });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+module.exports = { addHording, getAllHordings, addHordingWithFile , getAllHordingsByUserId, updateHording, getHordingById,getHordingsByLocation };
