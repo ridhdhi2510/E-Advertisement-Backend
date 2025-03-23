@@ -2,8 +2,8 @@ const hordingModel = require("../models/HordingModel");
 const multer = require("multer");
 const path = require("path");
 const cloudinaryUtil = require("../utils/CloudnaryUtil");
-//storage engine
 
+//storage engine
 const storage = multer.diskStorage({
   destination: "./uploads",
   filename: function (req, file, cb) {
@@ -12,12 +12,13 @@ const storage = multer.diskStorage({
 });
 
 //multer object....
-
 const upload = multer({
   storage: storage,
   //fileFilter:
 }).single("image");
 
+
+//add hording
 const addHording = async (req, res) => {
   try {
     const savedHording = await hordingModel.create(req.body);
@@ -30,6 +31,7 @@ const addHording = async (req, res) => {
   }
 };
 
+//get all hording
 const getAllHordings = async (req, res) => {
   try {
     const hordings = await hordingModel
@@ -48,6 +50,7 @@ const getAllHordings = async (req, res) => {
   }
 };
 
+//get all hording by user id
 const getAllHordingsByUserId = async (req , res) => {
   try{
     const hording = await hordingModel.find({userId: req.params.userId}).populate("stateId cityId areaId userId");
@@ -65,6 +68,8 @@ const getAllHordingsByUserId = async (req , res) => {
   }
 }
 
+
+//add hording with file
 const addHordingWithFile = async (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -91,4 +96,46 @@ const addHordingWithFile = async (req, res) => {
   });
 };
 
-module.exports = { addHording, getAllHordings, addHordingWithFile , getAllHordingsByUserId };
+//update hording
+  const updateHording = async (req, res) => {
+    //update tablename set  ? where id = ?
+    //update new data -->req.body
+    //id -->req.params.id
+  
+    try {
+      const updatedHording = await hordingModel.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true }
+      );
+      res.status(200).json({
+        message: "Hording updated successfully",
+        data: updatedHording,
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: "error while update hording",
+        err: err,
+      });
+    }
+  };
+
+//get hording by Id
+  const getHordingById= async(req,res)=>{
+    try {
+      const hording = await hordingModel.findById(req.params.id);
+      if (!hording) {
+        res.status(404).json({ message: "No hording found" });
+      } else {
+        res.status(200).json({
+          message: "Hording found successfully",
+          data: hording,
+        });
+      }
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+
+
+module.exports = { addHording, getAllHordings, addHordingWithFile , getAllHordingsByUserId, updateHording, getHordingById };
