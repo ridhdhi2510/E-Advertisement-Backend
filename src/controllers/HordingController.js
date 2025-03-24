@@ -3,15 +3,15 @@ const multer = require("multer");
 const path = require("path");
 const cloudinaryUtil = require("../utils/CloudnaryUtil");
 
-//storage engine
+// //storage engine
 const storage = multer.diskStorage({
-  destination: "./uploads",
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
+  // destination: "./uploads",
+  // filename: function (req, file, cb) {
+  //   cb(null, file.originalname);
+  // },
 });
 
-//multer object....
+// //multer object....
 const upload = multer({
   storage: storage,
   //fileFilter:
