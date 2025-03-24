@@ -7,6 +7,7 @@ const secret = "e-hoarding"
 
 const signup = async (req, res) => {
     try {
+        console.log("Received signup request:", req.body)
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
