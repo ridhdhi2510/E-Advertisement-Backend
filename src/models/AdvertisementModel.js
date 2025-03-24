@@ -57,6 +57,11 @@ const advertisementSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'users',
             required: true
+        },
+        hoardingId:{
+            type: Schema.Types.ObjectId,
+            ref: 'hoardings',
+            required: true
         }
 },{
     timestamps: true
