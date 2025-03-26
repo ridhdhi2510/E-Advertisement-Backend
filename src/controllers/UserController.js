@@ -51,7 +51,6 @@ const signup = async (req, res) => {
 
         //send mail to user
         const mailResponse = await mailUtil.sendingMail(createUser.email,"Welcome to eadvertisement",welcomeEmail )
-
         res.status(201).json({
             message: "User created successfully",
             data: createUser
