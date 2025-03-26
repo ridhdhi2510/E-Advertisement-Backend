@@ -157,5 +157,15 @@ const getHordingsByLocation = async (req, res) => {
   }
 };
 
+//delete api
+const deleteHording = async(req,res) => {
+  const deletedHording = await hordingModel.findByIdAndDelete(req.params.id)
 
-module.exports = { addHording, getAllHordings, addHordingWithFile , getAllHordingsByUserId, updateHording, getHordingById,getHordingsByLocation };
+  res.json({
+    message : " hoarding removed successfully",
+    data : deletedHording
+  })
+}
+
+
+module.exports = { addHording, getAllHordings, addHordingWithFile , getAllHordingsByUserId, updateHording, getHordingById,getHordingsByLocation, deleteHording };
