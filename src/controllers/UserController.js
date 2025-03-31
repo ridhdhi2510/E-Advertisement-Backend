@@ -185,6 +185,26 @@ const deleteUser = async(req,res)=>{
         }
     }
 
+    const updateProfile = async(req , res) => {
+        try{
+            const { id } = req.params;
+            const { name, email } = req.body;
+            const updatedPro = await userModel.findByIdAndUpdate(
+                id,
+                { name, email },
+                { new: true, runValidators: true }
+            );
+
+            res.status(200).json({
+                message: "Profile Updated Successfully...",
+                data : updatedPro
+            })            
+
+        }catch(err){
+            console.log(err.message)
+        }
+    }
+
 module.exports = {
     signup,
     getAllUsers,
@@ -192,5 +212,6 @@ module.exports = {
     deleteUser,
     loginUser,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    updateProfile
 }

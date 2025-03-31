@@ -8,5 +8,6 @@ routes.delete("/deletebyid/:id",userController.deleteUser)
 routes.post("/login",userController.loginUser)
 routes.post("/forgotpassword",userController.forgotPassword)
 routes.post("/resetpassword",userController.resetPassword)
+routes.put("/update/:id" ,userController.updateProfile )
 
 module.exports = routes
