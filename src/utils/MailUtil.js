@@ -6,7 +6,7 @@ const sendingMail = async(to, subject, html) =>{
         service : "gmail",
         auth:{
             user: "living.in.era@gmail.com",
-            pass : "hbgd hvct mxmn qpww"
+            pass : "drgd ocrk ajgh ktss"
         }
     })
 
