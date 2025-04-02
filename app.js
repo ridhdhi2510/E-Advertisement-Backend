@@ -28,8 +28,10 @@ app.use("/area",areaRoutes)
 const hordingRoutes = require("./src/routes/HordingRoutes")
 app.use("/hording",hordingRoutes)
 
-const advertisementRoutes = require("./src/routes/AdvertisementRoutes")
-app.use("/advertisement",advertisementRoutes)
+
+// const bookingRoutes = require("./src/routes/BookingRoutes");
+// app.use("/booking", bookingRoutes);
+
 
 
 const PORT = 3000
