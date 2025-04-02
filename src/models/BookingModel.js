@@ -40,15 +40,16 @@ const bookingSchema = new Schema({
     type: Number,
     required: true,
   },
-  paymentStatus: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
+  // paymentStatus: {
+  //   type: Boolean,
+  //   required: true,
+  //   default: false,
+  // },
   paymentId: {
     type: Schema.Types.ObjectId,
-    ref: "payments",
-    default: null, // Linked only if payment is successful
+    ref: "payment",
+    // required: true
+    //default: null, // Linked only if payment is successful
   },
 }, { timestamps: true });
 
