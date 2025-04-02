@@ -42,7 +42,7 @@ const getAllPayments = async(req,res) => {
     }
 }
 
-const getAllPaymentsById = async(req,res) => {
+const getPaymentById = async(req,res) => {
     try{
         const showPaymentsbyId = await paymentModel.findById(req.params.id).populate("bookingId userId")
         if(showPaymentsbyId.length === 0){
@@ -89,6 +89,6 @@ const getAllPaymentsByUserId = async(req,res) => {
 module.exports = {
     addPayment,
     getAllPayments,
-    getAllPaymentsById,
+    getPaymentById,
     getAllPaymentsByUserId
 }
