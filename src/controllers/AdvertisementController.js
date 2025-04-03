@@ -22,6 +22,7 @@ const upload = multer({
   //fileFilter:
 }).single("image");
 
+//Add Advertisement
 const addAdvertisment = async(req,res)=>{
     try{
         const createadvertisment = await advertisementModel.create(req.body)
@@ -37,6 +38,7 @@ const addAdvertisment = async(req,res)=>{
     }
 }
 
+//Add Advertisement with file
 const addAdvertismentwithFile = async(req,res)=>{
     upload(req, res, async(err)=>{
         if(err){
@@ -60,6 +62,7 @@ const addAdvertismentwithFile = async(req,res)=>{
     })
 }
 
+//Get all advertisement
 const getAllAdvertisment = async(req,res)=>{
     try{
         const showadvertisments = await advertisementModel.find().populate("stateId cityId areaId userId")
@@ -82,6 +85,7 @@ const getAllAdvertisment = async(req,res)=>{
     }
 }
 
+//Get Advertisement by user id
 const getAllAdvertismentbyuserId = async(req,res)=>{
     try{
         const showadvertismentsbyuserId = await advertisementModel.find({userId: req.params.userId}).populate("stateId cityId areaId userId")

@@ -28,9 +28,11 @@ app.use("/area",areaRoutes)
 const hordingRoutes = require("./src/routes/HordingRoutes")
 app.use("/hording",hordingRoutes)
 
-const advertisementRoutes = require("./src/routes/AdvertisementRoutes")
-app.use("/advertisement",advertisementRoutes)
+const bookingRoutes = require("./src/routes/BookingRoutes");
+app.use("/booking", bookingRoutes);
 
+const paymentRoutes = require("./src/routes/PaymentRoutes")
+app.use("/payment",paymentRoutes)
 
 const PORT = 3000
 app.listen(PORT,()=>{

@@ -11,7 +11,6 @@ const hordingSchema = new Schema({
         enum: ['Unipole', 'Billboard', 'Gantry', 'Digital'],
         type: String,
         required: true
-        
     },
     Availablity_Status:{
         type: Boolean,
