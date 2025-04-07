@@ -38,7 +38,18 @@ const userSchema = new Schema({
     created_at: {
         type: Date,
         default: Date.now
-    }
+    },
+
+    phone: {
+        type: String,
+        maxlength: 20
+    },
+    bankDetails: {
+        bankName: String,
+        accountNumber: String,
+        accountHolderName: String,
+        iban: String
+    },
 })
 
 module.exports = mongoose.model("users",userSchema)
