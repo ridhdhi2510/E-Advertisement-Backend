@@ -34,6 +34,10 @@ app.use("/booking", bookingRoutes);
 const paymentRoutes = require("./src/routes/PaymentRoutes")
 app.use("/payment",paymentRoutes)
 
+// Add this with other route imports
+const agencyRoutes = require("./src/routes/AgencyRoutes");
+app.use("/agency", agencyRoutes);
+
 const PORT = 3000
 app.listen(PORT,()=>{
     console.log("server started on the port number"+ PORT)
