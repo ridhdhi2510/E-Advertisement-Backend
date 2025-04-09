@@ -93,26 +93,65 @@ const deleteUser = async(req,res)=>{
 
 //login user---->verification
     const loginUser = async (req, res) => {
-        const { email, password } = req.body;
-        const foundUserFromEmail = await userModel.findOne({ email }).populate("roleId"); // Ensure roleId is populated
+        try{
+            const { email, password } = req.body;
+            const foundUserFromEmail = await userModel.findOne({ email }).populate("roleId"); // Ensure roleId is populated
+    
+            if (!foundUserFromEmail) {
+                return res.status(401).json({ message: "Email not found" });
+            }
+    
+            const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
+            if (!isMatch) {
+                return res.status(401).json({ message: "Invalid credentials" });
+            }
+    
+            // Debugging: Log the response to check if roleId is present
+            console.log("User Data Response:", foundUserFromEmail);
+    
+            res.status(200).json({
+                message: "Login successfully",
+                data: foundUserFromEmail
+            });
 
-        if (!foundUserFromEmail) {
-            return res.status(401).json({ message: "Email not found" });
+        }catch(err){
+            res.status(500).json({
+                message: err.message
+            })
         }
-
-        const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: "Invalid credentials" });
-        }
-
-        // Debugging: Log the response to check if roleId is present
-        console.log("User Data Response:", foundUserFromEmail);
-
-        res.status(200).json({
-            message: "Login successfully",
-            data: foundUserFromEmail
-        });
     };
+
+//login user with Authentication and Authorization using JWT
+    const loginUserWithToken = async (req, res) => {
+        try{
+            const { email, password } = req.body;
+            const foundUserFromEmail = await userModel.findOne({ email }).populate("roleId"); // Ensure roleId is populated
+    
+            if (!foundUserFromEmail) {
+                return res.status(401).json({ message: "Email not found" });
+            }
+            else{
+                const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
+                if (!isMatch) {
+                    return res.status(401).json({ message: "Invalid credentials" });
+                }
+                else{
+                    // Debugging: Log the response to check if roleId is present
+                    console.log("User Data Response:", foundUserFromEmail);
+                    const token = jwt.sign(foundUserFromEmail.toObject(),secret)
+                    //const token = jwt.sign({id:foundUserFromEmail._id},secret)
+                    res.status(200).json({
+                        message: "Login successfully",
+                        token: token
+                    });
+                }
+            }
+        }catch(err){
+            res.status(500).json({
+                message: err.message
+            })
+        }
+    }
 
 //forgotpassword ---> mail for it
     const forgotPassword = async (req,res)=>{
@@ -211,6 +250,7 @@ module.exports = {
     getUserById,
     deleteUser,
     loginUser,
+    loginUserWithToken,
     forgotPassword,
     resetPassword,
     updateProfile
