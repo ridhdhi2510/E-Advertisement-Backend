@@ -1,6 +1,7 @@
 const BookingModel = require("../models/BookingModel");
 const multer = require("multer");
 const cloudinaryUtil = require("../utils/cloudnaryUtil");
+const { getDatesInRange } = require('../utils/dateUtil');
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -109,5 +110,35 @@ const deleteBooking = async (req, res) => {
     res.status(500).json({ message: "Error deleting booking", error: error.message });
   }
 };
+const checkDateAvailability=async(req,res) => {
+  try{
+    
+  const { hordingId, startDate, endDate } = req.params;
+  
+  const requestedStart = new Date(startDate);
+  const requestedEnd = new Date(endDate)
+  const existingbooking=await BookingModel.find({hordingId})
+  const requestedDates = getDatesInRange(requestedStart, requestedEnd);
+  let bookedDates = []
+  existingbooking.forEach(booking => {
+    bookedDates = [...bookedDates, ...getDatesInRange(booking.startDate, booking.endDate)];
+  });
+  const conflictingDates = requestedDates.filter(date => bookedDates.includes(date));
+  const availableDates = requestedDates.filter(date => !bookedDates.includes(date));
+  res.status(200).json({
+    canBookFullRange: conflictingDates.length === 0,
+    availableForPartial: availableDates.length > 0,
+    conflictingDates,
+    availableDates
+    
+  });}
+  catch(error){
+    res.status(500).json({ 
+      message: "Availability check failed",
+      error: error.message 
+    });
+  }
+  
+}
 
-module.exports = { addBooking, getAllBookings, getBookingById, getBookingsByUserId, updateBooking, deleteBooking };
+module.exports = { addBooking, getAllBookings, getBookingById, getBookingsByUserId, updateBooking, deleteBooking ,checkDateAvailability};
