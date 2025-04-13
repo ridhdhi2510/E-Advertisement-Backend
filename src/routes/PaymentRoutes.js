@@ -2,6 +2,7 @@ const routes = require("express").Router()
 const paymentController = require("../controllers/PaymentController")
 
 routes.post("/add",paymentController.addPayment)
+routes.put("/update/:id",paymentController.updatePayment)
 routes.get("/getall",paymentController.getAllPayments)
 routes.get("/getbyid/:id",paymentController.getPaymentById)
 routes.get("/getallbyuserId/:userId",paymentController.getAllPaymentsByUserId)

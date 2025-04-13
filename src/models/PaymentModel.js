@@ -35,7 +35,8 @@ const paymentSchema = new Schema({
     bookingId:{
         type: Schema.Types.ObjectId,
         ref: "booking",
-        required: true
+        required: false,
+        default:null
     },
     userId:{
         type: Schema.Types.ObjectId,

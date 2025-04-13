@@ -11,7 +11,50 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage }).single("adFile");
 
+
 // Add booking
+// const addBooking = async (req, res) => {
+//   upload(req, res, async (err) => {
+//     if (err) {
+//       return res.status(500).json({ message: err.message });
+//     }
+
+//     try {
+//       const { adName, adDescription, startDate, endDate, totalCost, websiteProductUrl, userId, hordingId} = req.body;
+//       // const userId = req.headers["userid"];
+//       // const hordingId = req.headers["hordingid"];
+      
+//       // if (!userId || !hordingId) {
+//       //   return res.status(400).json({ message: "User ID and Hoarding ID are required!" });
+//       // }
+      
+//       let adFileUrl = null;
+//       if (req.file) {
+//         const cloudinaryResponse = await cloudinaryUtil.uploadFileToCloudinary(req.file);
+//         adFileUrl = cloudinaryResponse.secure_url;
+//       }
+//       if (!userId || !hordingId || !startDate || !endDate || !adName || !adDescription || !totalCost) {
+//         return res.status(400).json({ message: "Missing required booking fields" });
+//       }
+      
+//       const newBooking = await BookingModel.create({
+//         hordingId,
+//         userId,
+//         adName,
+//         adDescription,
+//         adFile: adFileUrl,
+//         websiteProductUrl,
+//         startDate,
+//         endDate,
+//         totalCost,
+//       });
+      
+//       res.status(201).json({ message: "Booking created successfully", data: newBooking });
+//     } catch (error) {
+//       res.status(500).json({ message: "Error adding booking", error: error.message });
+//     }
+//   });
+// };
 const addBooking = async (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -19,20 +62,44 @@ const addBooking = async (req, res) => {
     }
 
     try {
-      const { adName, adDescription, startDate, endDate, totalCost, websiteProductUrl } = req.body;
-      const userId = req.headers["userid"];
-      const hordingId = req.headers["hordingid"];
-      
-      if (!userId || !hordingId) {
-        return res.status(400).json({ message: "User ID and Hoarding ID are required!" });
+      console.log("Incoming booking form:", req.body);
+      console.log("Uploaded file info:", req.file);
+
+      const {
+        adName,
+        adDescription,
+        startDate,
+        endDate,
+        totalCost,
+        websiteProductUrl,
+        userId,
+        hordingId, // ✅ FIXED typo from 'hordingId'
+      } = req.body;
+
+      // ✅ Validate required fields
+      if (
+        !userId ||
+        !hordingId ||
+        !startDate ||
+        !endDate ||
+        !adName ||
+        !adDescription ||
+        !totalCost
+      ) {
+        return res.status(400).json({
+          message: "Missing required booking fields",
+        });
       }
-      
+
+      // ✅ Upload to Cloudinary if file is present
       let adFileUrl = null;
       if (req.file) {
         const cloudinaryResponse = await cloudinaryUtil.uploadFileToCloudinary(req.file);
+        console.log("Cloudinary Upload Response:", cloudinaryResponse);
         adFileUrl = cloudinaryResponse.secure_url;
       }
-      
+
+      // ✅ Create booking in DB
       const newBooking = await BookingModel.create({
         hordingId,
         userId,
@@ -44,10 +111,18 @@ const addBooking = async (req, res) => {
         endDate,
         totalCost,
       });
-      
-      res.status(201).json({ message: "Booking created successfully", data: newBooking });
+
+      res.status(201).json({
+        message: "Booking created successfully",
+        data: newBooking,
+      });
+
     } catch (error) {
-      res.status(500).json({ message: "Error adding booking", error: error.message });
+      console.error("Booking creation error:", error);
+      res.status(500).json({
+        message: "Error adding booking",
+        error: error.message,
+      });
     }
   });
 };
