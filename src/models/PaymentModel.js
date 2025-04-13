@@ -12,7 +12,7 @@ const paymentSchema = new Schema({
         required: true
     },
     paymentStatus:{
-        enum: ["Pending", "Completed", "Failed", "Refunded"],
+        enum: ["Pending", "succeeded", "failed", "Refunded"],
         type: String,
         required: true,
         default: "Pending"
