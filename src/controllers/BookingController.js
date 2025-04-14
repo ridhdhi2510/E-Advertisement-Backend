@@ -2,6 +2,7 @@ const BookingModel = require("../models/BookingModel");
 const multer = require("multer");
 const cloudinaryUtil = require("../utils/cloudnaryUtil");
 const { getDatesInRange } = require('../utils/dateUtil');
+const mailUtil = require("../utils/MailUtil.js"); 
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -173,20 +174,104 @@ const updateBooking = async (req, res) => {
   }
 };
 
-// Delete booking by id
+// Delete booking by id + half refund mail
+// const deleteBooking = async (req, res) => {
+//   try {
+//     const bookingdemo = await BookingModel.findById(req.params.id).populate("userId")
+//     const deletedBooking = await BookingModel.findByIdAndDelete(req.params.id);
+//     const userEmail = bookingdemo.userId.email;
+//     console.log(userEmail)
+//     if (!deletedBooking) {
+//       return res.status(404).json({ message: "Booking not found" });
+//     }
+//     else{
+//       const halfRefundEmail = `<!DOCTYPE html>
+//                                                    <html>
+//                                                    <head>
+//                                                        <meta charset="UTF-8">
+//                                                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//                                                        <title>Reset Your Password</title>
+//                                                    </head>
+//                                                    <body>
+//                                                        <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.5; color: #333;">
+//                                                            <h2 style="color: #007bff;">Password Reset Request</h2>
+//                                                            <p>You recently requested to reset your password. Click the button below to set a new password.</p>
+//                                                            <a href="${url}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+//                                                            <p>If you did not request this, please ignore this email. Your password will remain unchanged.</p>
+//                                                            <p>Best regards,</p>
+//                                                            <p><strong>Take Outdoors Team</strong></p>
+//                                                        </div>
+//                                                    </body>
+//                                                    </html>
+//                       `;
+//                       //email send...
+//       await mailUtil.sendingMail(userEmail,"Cancle Booking Refund",halfRefundEmail)
+//     }
+//     res.status(200).json({ message: "Booking deleted successfully" });
+//   } catch (error) {
+//     res.status(500).json({ message: "Error deleting booking", error: error.message });
+//   }
+// };
 const deleteBooking = async (req, res) => {
   try {
-    const deletedBooking = await BookingModel.findByIdAndDelete(req.params.id);
-    if (!deletedBooking) {
+    // First find the booking with populated user data
+    const booking = await BookingModel.findById(req.params.id).populate({
+      path: 'userId',
+      select: 'email' // Only fetch the email field from user
+    });
+
+    if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
-    res.status(200).json({ message: "Booking deleted successfully" });
+
+    // Verify the populated user data exists
+    if (!booking.userId || !booking.userId.email) {
+      return res.status(400).json({ message: "User information not found for this booking" });
+    }
+
+    const userEmail = booking.userId.email;
+    console.log("User Email:", userEmail); // Should now print correctly
+
+    // Now delete the booking
+    const deletedBooking = await BookingModel.findByIdAndDelete(req.params.id);
+    
+    if (!deletedBooking) {
+      // This should theoretically never happen since we already found the booking
+      return res.status(500).json({ message: "Deletion failed after finding booking" });
+    }
+
+    const refundEmail = `<!DOCTYPE html>
+      <html>
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Booking Cancellation Refund</title>
+      </head>
+      <body>
+          <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.5; color: #333;">
+              <h2 style="color: #007bff;">Booking Cancellation</h2>
+              <p>Your booking has been successfully cancelled.</p>
+              <p>A refund has been processed for your booking. Please allow 3-5 business days for the amount to reflect in your account.</p>
+              <p>If you have any questions, please contact our support team.</p>
+              <p>Best regards,</p>
+              <p><strong>Take Outdoors Team</strong></p>
+          </div>
+      </body>
+      </html>`;
+
+    await mailUtil.sendingMail(userEmail, "Booking Cancellation Refund", refundEmail);
+
+    return res.status(200).json({ message: "Booking deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting booking", error: error.message });
+    console.error("Error in deleteBooking:", error);
+    return res.status(500).json({ 
+      message: "Error deleting booking", 
+      error: error.message 
+    });
   }
 };
 
-// Delete booking by hordingId
+// Delete booking by hordingId + full refund mail
 const deleteBookingbyhordingId = async(req,res) => {
   try{
     const deletebookingbyhordingId = await BookingModel.findByIdAndDelete(req.params.hordingId);
