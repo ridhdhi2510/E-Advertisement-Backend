@@ -111,8 +111,8 @@ const addHordingWithFile = async (req, res) => {
 
       // Upload file to Cloudinary
       const cloudinaryResponse = await cloudinaryUtil.uploadFileToCloudinary(req.file);
-      console.log("Cloudinary Response:", cloudinaryResponse);
-      console.log("Request Body:", req.body);
+      // console.log("Cloudinary Response:", cloudinaryResponse);
+      // console.log("Request Body:", req.body);
 
       // Ensure Cloudinary upload was successful
       if (!cloudinaryResponse || !cloudinaryResponse.secure_url) {
