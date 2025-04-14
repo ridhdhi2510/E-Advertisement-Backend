@@ -8,6 +8,8 @@ routes.get("/getBookingByid/:id", bookingController.getBookingById);
 routes.get("/getBookingByUserId/:userId", bookingController.getBookingsByUserId);
 routes.put("/updateBooking/:id", bookingController.updateBooking);
 routes.delete("/deleteBooking/:id", bookingController.deleteBooking);
+routes.delete("/deleteBookingbyhoardingId/:hoardingId", bookingController.deleteBookingbyhordingId);
+routes.delete("/deleteBookingbyuserId/:userId", bookingController.deleteBookingbyuserId);
 // Add this new route
 routes.get('/check-availibility/:hordingId/:startDate/:endDate', bookingController.checkDateAvailability);
 

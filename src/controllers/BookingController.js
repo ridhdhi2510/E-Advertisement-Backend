@@ -173,7 +173,7 @@ const updateBooking = async (req, res) => {
   }
 };
 
-// Delete booking
+// Delete booking by id
 const deleteBooking = async (req, res) => {
   try {
     const deletedBooking = await BookingModel.findByIdAndDelete(req.params.id);
@@ -185,6 +185,41 @@ const deleteBooking = async (req, res) => {
     res.status(500).json({ message: "Error deleting booking", error: error.message });
   }
 };
+
+// Delete booking by hordingId
+const deleteBookingbyhordingId = async(req,res) => {
+  try{
+    const deletebookingbyhordingId = await BookingModel.findByIdAndDelete(req.params.hordingId);
+    if (!deletebookingbyhordingId) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    res.status(200).json({ message: "Booking deleted successfully" });
+  }
+  catch(err){
+    res.status(500).json({
+      message: err.message
+    })
+  }
+}
+
+// Delete booking by hordingId
+const deleteBookingbyuserId = async(req,res) => {
+  try{
+    const deletebookingbyuserId = await BookingModel.findByIdAndDelete(req.params.userId);
+    if (!deletebookingbyuserId) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    res.status(200).json({ message: "Booking deleted successfully" });
+  }
+  catch(err){
+    res.status(500).json({
+      message: err.message
+    })
+  }
+}
+
+
+//date availability
 const checkDateAvailability=async(req,res) => {
   try{
     
@@ -216,4 +251,4 @@ const checkDateAvailability=async(req,res) => {
   
 }
 
-module.exports = { addBooking, getAllBookings, getBookingById, getBookingsByUserId, updateBooking, deleteBooking ,checkDateAvailability};
+module.exports = { addBooking, getAllBookings, getBookingById, getBookingsByUserId, updateBooking, deleteBooking ,checkDateAvailability, deleteBookingbyhordingId, deleteBookingbyuserId};
