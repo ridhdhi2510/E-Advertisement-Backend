@@ -1,3 +1,4 @@
+
 const paymentModel = require("../models/PaymentModel");
 
 //add post
@@ -49,6 +50,7 @@ const addPayment = async (req, res) => {
       });
     }
   };
+  };
 
 const getAllPayments = async (req, res) => {
   try {
@@ -62,7 +64,25 @@ const getAllPayments = async (req, res) => {
         message: "Successfully fetched all payments",
         data: showPayments,
       });
+const getAllPayments = async (req, res) => {
+  try {
+    const showPayments = await paymentModel.find().populate("bookingId userId");
+    if (showPayments.length === 0) {
+      res.status(404).json({
+        message: "No payments found",
+      });
+    } else {
+      res.status(200).json({
+        message: "Successfully fetched all payments",
+        data: showPayments,
+      });
     }
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
   } catch (err) {
     res.status(500).json({
       message: err.message,
@@ -84,6 +104,20 @@ const getPaymentById = async (req, res) => {
         message: "Successfully fetched all payments by Id",
         data: showPaymentsbyId,
       });
+const getPaymentById = async (req, res) => {
+  try {
+    const showPaymentsbyId = await paymentModel
+      .findById(req.params.id)
+      .populate("bookingId userId");
+    if (showPaymentsbyId.length === 0) {
+      res.status(404).json({
+        message: "No payments found",
+      });
+    } else {
+      res.status(200).json({
+        message: "Successfully fetched all payments by Id",
+        data: showPaymentsbyId,
+      });
     }
   } catch (err) {
     res.status(500).json({
@@ -91,7 +125,27 @@ const getPaymentById = async (req, res) => {
     });
   }
 };
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
 
+const getAllPaymentsByUserId = async (req, res) => {
+  try {
+    const showPaymentsbyUserId = await paymentModel
+      .find({ userId: req.params.userId })
+      .populate("bookingId userId");
+    if (showPaymentsbyUserId.length === 0) {
+      res.status(404).json({
+        message: "No payments found",
+      });
+    } else {
+      res.status(200).json({
+        message: "Successfully fetched all payments by Id",
+        data: showPaymentsbyUserId,
+      });
 const getAllPaymentsByUserId = async (req, res) => {
   try {
     const showPaymentsbyUserId = await paymentModel
