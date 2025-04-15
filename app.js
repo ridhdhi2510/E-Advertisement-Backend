@@ -35,6 +35,9 @@ app.use("/booking", bookingRoutes);
 const paymentRoutes = require("./src/routes/PaymentRoutes")
 app.use("/payment",paymentRoutes)
 
+const bankdetailsagencyRoutes = require("./src/routes/BankDetailsAgencyRoutes");
+app.use("/bankdetailsagency",bankdetailsagencyRoutes);
+
 // Add this with other route imports
 const agencyRoutes = require("./src/routes/AgencyRoutes");
 app.use("/agency", agencyRoutes);
