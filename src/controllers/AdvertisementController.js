@@ -62,7 +62,7 @@ const addAdvertismentwithFile = async(req,res)=>{
     })
 }
 
-//Get all advertisement
+//Get all advertisement 
 const getAllAdvertisment = async(req,res)=>{
     try{
         const showadvertisments = await advertisementModel.find().populate("stateId cityId areaId userId")

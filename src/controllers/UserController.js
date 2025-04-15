@@ -151,7 +151,7 @@ const deleteUser = async(req,res)=>{
                 }
                 else{
                     // Debugging: Log the response to check if roleId is present
-                    console.log("User Data Response:", foundUserFromEmail);
+                    // console.log("User Data Response:", foundUserFromEmail);
                     const token = jwt.sign(foundUserFromEmail.toObject(),secret)
                     //const token = jwt.sign({id:foundUserFromEmail._id},secret)
                     res.status(200).json({

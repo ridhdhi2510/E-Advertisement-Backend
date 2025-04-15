@@ -1,7 +1,9 @@
 const hordingModel = require("../models/HordingModel");
 const multer = require("multer");
 const path = require("path");
-const cloudinaryUtil = require("../utils/CloudnaryUtil");
+const { deleteBookingsbyhordingId } = require("../controllers/BookingController");
+// const cloudinaryUtil = require("../utils/cloudnaryUtil");
+const cloudinaryUtil = require("../utils/CloudnaryUtil.js");
 const { createActivity } = require('./ActivityController');
 
 // //storage engine
@@ -228,14 +230,46 @@ const getHordingsByLocation = async (req, res) => {
 };
 
 //delete api
+// const deleteHording = async(req,res) => {
+//   const deletedHording = await hordingModel.findByIdAndDelete(req.params.id)
+
+//   res.json({
+//     message : " hoarding removed successfully",
+//     data : deletedHording
+//   })
+// }
+
 const deleteHording = async(req,res) => {
-  const deletedHording = await hordingModel.findByIdAndDelete(req.params.id)
+  try {
+    const hoardingId = req.params.id;
 
-  res.json({
-    message : " hoarding removed successfully",
-    data : deletedHording
-  })
-}
+    // First cancel all associated bookings
+    const cancellationResult = await deleteBookingsbyhordingId(hoardingId);
+    console.log('Booking cancellation result:', cancellationResult);
 
+    // Then delete the hoarding
+    const deletedHoarding = await hordingModel.findByIdAndDelete(hoardingId);
+    
+    if (!deletedHoarding) {
+      return res.status(404).json({
+        success: false,
+        message: "Hoarding not found"
+      });
+    }
 
+    return res.status(200).json({
+      success: true,
+      message: "Hoarding deleted successfully",
+      bookingsCancelled: cancellationResult.cancelled
+    });
+
+  } catch (error) {
+    console.error('Error deleting hoarding:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Error deleting hoarding",
+      error: error.message
+    });
+  }
+} 
 module.exports = { addHording, getAllHordings, addHordingWithFile , getAllHordingsByUserId, updateHording, getHordingById,getHordingsByLocation, deleteHording };
