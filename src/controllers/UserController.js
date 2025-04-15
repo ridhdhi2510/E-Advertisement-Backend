@@ -1,5 +1,6 @@
 const userModel = require("../models/UserModel.js")
 const roleModel = require("../models/RoleModel.js")
+const { createActivity } = require('./ActivityController');
 const mailUtil = require("../utils/MailUtil.js"); // Import mail utility
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
@@ -25,6 +26,19 @@ const signup = async (req, res) => {
             password: hashedPassword,
             roleId: role._id, // Store roleId instead of role name
         });
+
+        // Log the activity (with error handling)
+        try {
+            await createActivity(
+                'signup',
+                createUser._id,
+                createUser.name,
+                null,
+                `${createUser.name} signed up as ${role.name}` // Use role.name from DB
+            );
+        } catch (activityError) {
+            console.error("Failed to log signup activity:", activityError);
+        }
 
         //html mail text
         const welcomeEmail = `

@@ -43,6 +43,9 @@ app.use("/agency", agencyRoutes);
 const stripeRoutes = require('./src/routes/StripePayRoutes');
 app.use('/stripe', stripeRoutes);
 
+const activityRoutes = require('./src/routes/ActivityRoutes');
+app.use('/activity', activityRoutes);
+
 const PORT = 3000
 app.listen(PORT,()=>{
     console.log("server started on the port number"+ PORT)
