@@ -1,8 +1,10 @@
 const hordingModel = require("../models/HordingModel");
 const multer = require("multer");
 const path = require("path");
+const mailUtil = require("../utils/MailUtil.js");
+
 const { deleteBookingsbyhordingId } = require("../controllers/BookingController");
-// const cloudinaryUtil = require("../utils/cloudnaryUtil");
+
 const cloudinaryUtil = require("../utils/CloudnaryUtil.js");
 
 // //storage engine
@@ -213,8 +215,11 @@ const getHordingsByLocation = async (req, res) => {
 
 const deleteHording = async(req,res) => {
   try {
+    // console.log(req.params)
     const hoardingId = req.params.id;
-
+    const hording = await hordingModel.findById(hoardingId)
+          .populate("userId", "email name") // Only get user's email
+          .exec()
     // First cancel all associated bookings
     const cancellationResult = await deleteBookingsbyhordingId(hoardingId);
     console.log('Booking cancellation result:', cancellationResult);
@@ -228,6 +233,53 @@ const deleteHording = async(req,res) => {
         message: "Hoarding not found"
       });
     }
+    if (hording.userId?.email) {
+          const emailContent = `<!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { color: #c0392b; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+              .content { margin: 20px 0; }
+              .penalty-box { background: #fbe9e7; padding: 15px; border-radius: 5px; margin: 20px 0; color: #c0392b; }
+              .footer { font-size: 0.9em; color: #7f8c8d; border-top: 1px solid #eee; padding-top: 10px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h2>Notice: Hoarding Removed </h2>
+            </div>
+            
+            <div class="content">
+              <p>Dear ${hording.userId.name || "Agency"},</p>
+              
+              <p>We noticed that your hoarding (ID: <strong>${hoardingId}</strong>) has been removed while it still had active bookings.</p>
+              
+              <div class="penalty-box">
+                <h3>Penalty Notice</h3>
+                <p>This action violates our platform policy and may have caused inconvenience to our users. A penalty is applicable for this violation.</p>
+                <p><strong>Action Required:</strong> Please contact our support team immediately to resolve this and pay the applicable penalty.</p>
+              </div>
+        
+              <p>If this was done by mistake, please inform us at the earliest to avoid further consequences.</p>
+            </div>
+            
+            <div class="footer">
+              <p>Thank you for your cooperation.</p>
+              <p><strong>The Take Outdoors Team</strong></p>
+            </div>
+          </body>
+          </html>
+          `;
+    
+          await mailUtil.sendingMail(
+            hording.userId.email,
+            "Hoarding Cancellation Confirmation",
+            emailContent
+          );
+          console.log("Cancellation email sent to:", hording.userId.email);
+        }
 
     return res.status(200).json({
       success: true,

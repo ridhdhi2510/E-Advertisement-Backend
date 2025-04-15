@@ -141,6 +141,32 @@ const updatePayment = async (req, res) => {
     });
   }
 };
+ const  updatePaymentRefund=async(paymentId,refundamount)=>{
+  try{
+    const updateRefund=await paymentModel.findByIdAndUpdate( paymentId,
+      {
+        $set: {
+          paymentStatus: "Refunded",
+          refundStatus: "Completed",
+          amount:refundamount
+        }
+      },
+      { new: true })
+    return {
+      success: true,
+      data:updateRefund,
+      message: "payment status changed",
+    };
+  }
+  catch (error) {
+    console.error("Error in update paymentstatus", error);
+    return {
+      success: false,
+      message: "Failed to update payment status",
+      error: error.message,
+    };
+  }
+ }
 
 
 
@@ -149,5 +175,6 @@ module.exports = {
   getAllPayments,
   getPaymentById,
   getAllPaymentsByUserId,
-  updatePayment
+  updatePayment,
+  updatePaymentRefund
 };
