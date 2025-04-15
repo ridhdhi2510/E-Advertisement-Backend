@@ -6,6 +6,7 @@ const mailUtil = require("../utils/MailUtil.js");
 const { deleteBookingsbyhordingId } = require("../controllers/BookingController");
 
 const cloudinaryUtil = require("../utils/CloudnaryUtil.js");
+const { createActivity } = require('./ActivityController');
 
 // //storage engine
 const storage = multer.diskStorage({
@@ -129,20 +130,34 @@ const addHordingWithFile = async (req, res) => {
       // Save hording data to the database
       const savedHording = await hordingModel.create(req.body);
 
-      res.status(200).json({
-        message: "Hording saved successfully",
-        data: savedHording,
+      try {
+        await createActivity(
+          'hording_added',
+          req.body.userId,
+          req.body.userName, // You'll need to pass this or fetch it
+          savedHording._id,
+          `New hoarding added by ${req.body.userName}`
+        );
+      } catch (activityError) {
+        console.error('Failed to log hoarding added activity:', activityError);
+        // Continue with the response even if activity logging fails
+        // You might want to add this error to your response metadata
+      }
+
+          res.status(200).json({
+            message: "Hording saved successfully",
+            data: savedHording,
+          });
+
+        } catch (error) {
+          console.error("Error in addHordingWithFile:", error);
+          res.status(500).json({ message: "Server error", error: error.message });
+        }
       });
-
-    } catch (error) {
-      console.error("Error in addHordingWithFile:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
-    }
-  });
-};
+    };
 
 
-//update hording
+    //update hording
 const updateHording = async (req, res) => {
   //update tablename set  ? where id = ?
   //update new data -->req.body
@@ -154,6 +169,19 @@ const updateHording = async (req, res) => {
       req.body,
       { new: true }
     );
+
+    // Log activity
+    try {
+      await createActivity(
+        'hording_updated',
+        req.body.userId,
+        req.body.userId?.name,
+        req.params.id,
+        `Hoarding updated by ${req.body.userName}`
+      );
+    } catch (activityError) {
+      console.error('Activity logging failed:', activityError);
+    }
     res.status(200).json({
       message: "Hording updated successfully",
       data: updatedHording,

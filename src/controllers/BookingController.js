@@ -5,6 +5,7 @@ const cloudinaryUtil = require("../utils/CloudnaryUtil.js");
 const { getDatesInRange } = require("../utils/dateUtil");
 const mailUtil = require("../utils/MailUtil.js");
 const mongoose = require('mongoose');
+const { createActivity } = require('./ActivityController');
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -13,8 +14,6 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage: storage }).single("adFile");
-
-// Add booking
 // const addBooking = async (req, res) => {
 //   upload(req, res, async (err) => {
 //     if (err) {
@@ -117,6 +116,19 @@ const addBooking = async (req, res) => {
         totalCost,
         paymentId
       });
+
+      try {
+        await createActivity(
+          'booking_created',
+          userId,
+          userName, // Make sure this is available
+          newBooking._id,
+          `New booking created by ${userName}`
+        );
+      } catch (error) {
+        console.error('Error while creating activity for booking creation:', error);
+      }
+      
 
       res.status(201).json({
         message: "Booking created successfully",
@@ -224,6 +236,20 @@ const deleteBooking = async (req, res) => {
       });
     }
     
+
+    try {
+      await createActivity(
+        'booking_cancelled',
+        booking.userId._id,
+        booking.userId.name,
+        booking._id,
+        `Booking cancelled by ${booking.userId.name}`
+      );
+    } catch (error) {
+      console.error('Error while creating activity for booking cancellation:', error);
+    }
+    
+
     //Delete the booking
     const result = await BookingModel.deleteOne({ _id: req.params.id });
 

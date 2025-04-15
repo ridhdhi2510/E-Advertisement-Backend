@@ -44,12 +44,12 @@ const userSchema = new Schema({
         type: String,
         maxlength: 20
     },
-    bankDetails: {
-        bankName: String,
-        accountNumber: String,
-        accountHolderName: String,
-        iban: String
-    },
+    // bankDetails: {
+    //     bankName: String,
+    //     accountNumber: String,
+    //     accountHolderName: String,
+    //     iban: String
+    // },
 })
 
 module.exports = mongoose.model("users",userSchema)
