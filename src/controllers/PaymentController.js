@@ -95,14 +95,23 @@ const getAllPaymentsByUserId = async (req, res) => {
   try {
     const showPaymentsbyUserId = await paymentModel
       .find({ userId: req.params.userId })
-      .populate("bookingId userId");
+      .populate({
+        path: 'bookingId',
+        populate: [
+          { path: 'hordingId', populate: ['areaId', 'cityId', 'stateId'] },
+          { path: 'userId' }
+        ]
+      })
+      .sort({ paymentDate: -1 }); // Sort by most recent first
+
     if (showPaymentsbyUserId.length === 0) {
       res.status(404).json({
         message: "No payments found",
+        data: []
       });
     } else {
       res.status(200).json({
-        message: "Successfully fetched all payments by Id",
+        message: "Successfully fetched all payments by user Id",
         data: showPaymentsbyUserId,
       });
     }
@@ -132,6 +141,8 @@ const updatePayment = async (req, res) => {
     });
   }
 };
+
+
 
 module.exports = {
   addPayment,
