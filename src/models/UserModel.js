@@ -49,7 +49,7 @@ const userSchema = new Schema({
         accountNumber: String,
         accountHolderName: String,
         iban: String
-    },
+      }
 })
 
 module.exports = mongoose.model("users",userSchema)
