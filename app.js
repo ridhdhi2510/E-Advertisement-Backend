@@ -4,6 +4,7 @@ const cors = require("cors")
 const app = express()
 app.use(cors())
 app.use(express.json());
+require('dotenv').config();
 
 
 mongoose.connect("mongodb://127.0.0.1:27017/advertisement").then(()=>{
@@ -37,6 +38,10 @@ app.use("/payment",paymentRoutes)
 // Add this with other route imports
 const agencyRoutes = require("./src/routes/AgencyRoutes");
 app.use("/agency", agencyRoutes);
+ 
+// In your main server file (e.g., app.js or server.js)
+const stripeRoutes = require('./src/routes/StripePayRoutes');
+app.use('/stripe', stripeRoutes);
 
 const PORT = 3000
 app.listen(PORT,()=>{

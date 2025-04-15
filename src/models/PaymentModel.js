@@ -12,7 +12,7 @@ const paymentSchema = new Schema({
         required: true
     },
     paymentStatus:{
-        enum: ["Pending", "Completed", "Failed", "Refunded"],
+        enum: ["Pending", "succeeded", "failed", "Refunded"],
         type: String,
         required: true,
         default: "Pending"
@@ -35,7 +35,8 @@ const paymentSchema = new Schema({
     bookingId:{
         type: Schema.Types.ObjectId,
         ref: "booking",
-        required: true
+        required: false,
+        default:null
     },
     userId:{
         type: Schema.Types.ObjectId,

@@ -18,7 +18,7 @@ const sendingMail = async(to, subject, html) =>{
     }
 
     const mailResponse = await transporter.sendMail(mailOptions);
-    console.log(mailResponse);
+    // console.log(mailResponse);
     return mailResponse
 }
 
