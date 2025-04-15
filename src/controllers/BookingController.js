@@ -1,6 +1,7 @@
 const BookingModel = require("../models/BookingModel");
 const multer = require("multer");
-const cloudinaryUtil = require("../utils/cloudnaryUtil");
+// const cloudinaryUtil = require("../utils/cloudnaryUtil");
+const cloudinaryUtil = require("../utils/CloudnaryUtil.js");
 const { getDatesInRange } = require("../utils/dateUtil");
 const mailUtil = require("../utils/MailUtil.js");
 
@@ -292,23 +293,195 @@ const deleteBooking = async (req, res) => {
 };
 
 // Delete booking by hordingId + full refund mail
-const deleteBookingbyhordingId = async (req, res) => {
+// const deleteBookingsbyhordingId = async (req, res) => {
+//   try {
+//     const deletebookingsbyhordingId = await BookingModel.findByIdAndDelete(
+//       req.params.hordingId
+//     );
+//     if (!deletebookingsbyhordingId) {
+//       return res.status(404).json({ message: "Booking not found" });
+//     }
+//     res.status(200).json({ message: "Booking deleted successfully" });
+//   } catch (err) {
+//     res.status(500).json({
+//       message: err.message,
+//     });
+//   }
+// };
+
+const deleteBookingsbyhordingId = async (hoardingId) => {
   try {
-    const deletebookingbyhordingId = await BookingModel.findByIdAndDelete(
-      req.params.hordingId
-    );
-    if (!deletebookingbyhordingId) {
-      return res.status(404).json({ message: "Booking not found" });
+    // Validate hoarding ID
+    if (!hoardingId || !mongoose.Types.ObjectId.isValid(hoardingId)) {
+      throw new Error("Invalid hoarding ID format");
     }
-    res.status(200).json({ message: "Booking deleted successfully" });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
+
+    // Find all bookings for this hoarding (only future bookings)
+    const bookings = await BookingModel.find({ 
+      hoardingId,
+      startDate: { $gte: new Date() } // Only cancel future bookings
+    })
+    .populate("userId", "email name")
+    .lean();
+
+    if (!bookings || bookings.length === 0) {
+      return {
+        success: true,
+        cancelled: 0,
+        message: "No active bookings found for this hoarding"
+      };
+    }
+
+    // Process cancellations with transaction support
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    
+    try {
+      const cancellationResults = await Promise.all(
+        bookings.map(async (booking) => {
+          try {
+            // Validate booking data
+            if (!booking?.userId?.email || !booking?.paymentId) {
+              throw new Error("Incomplete booking data");
+            }
+
+            // Calculate refund (50% in this example)
+            const refundAmount = booking.paymentId.amount 
+              ? (booking.paymentId.amount).toFixed(2)
+              : 0;
+
+            // Send cancellation email
+            const emailContent = createCancellationEmail(
+              booking,
+              refundAmount,
+              true // isHoardingDeleted flag
+            );
+
+            await mailUtil.sendingMail(
+              booking.userId.email,
+              "Booking Cancelled: Hoarding Removed",
+              emailContent
+            );
+
+            // Delete booking
+            await BookingModel.deleteOne({ _id: booking._id }, { session });
+
+            return {
+              success: true,
+              bookingId: booking._id,
+              refundAmount
+            };
+          } catch (error) {
+            console.error(`Failed to cancel booking ${booking?._id}:`, error);
+            return {
+              success: false,
+              bookingId: booking?._id,
+              error: error.message
+            };
+          }
+        })
+      );
+
+      await session.commitTransaction();
+      
+      const successful = cancellationResults.filter(r => r.success).length;
+      return {
+        success: true,
+        cancelled: successful,
+        total: bookings.length,
+        results: cancellationResults
+      };
+
+    } catch (transactionError) {
+      await session.abortTransaction();
+      throw transactionError;
+    } finally {
+      session.endSession();
+    }
+
+  } catch (error) {
+    console.error("Error in deleteBookingsbyhordingId:", error);
+    return {
+      success: false,
+      message: "Failed to cancel bookings",
+      error: error.message
+    };
   }
 };
 
-// Delete booking by hordingId
+// Helper function (same as before)
+const createCancellationEmail = (booking, refundAmount, isHoardingDeleted = false) => {
+  const reason = "the advertising hoarding has been removed from our platform";
+
+  return `<!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <style>
+                  body { 
+                      font-family: Arial, sans-serif; 
+                      line-height: 1.6; 
+                      color: #333; 
+                      max-width: 600px; 
+                      margin: 0 auto; 
+                      padding: 20px; 
+                  }
+                  .header { 
+                      color: #2c3e50; 
+                      border-bottom: 1px solid #eee; 
+                      padding-bottom: 10px; 
+                  }
+                  .content { 
+                      margin: 20px 0; 
+                  }
+                  .refund { 
+                      background: #f8f9fa; 
+                      padding: 15px; 
+                      border-radius: 5px; 
+                      margin: 20px 0; 
+                  }
+                  .footer { 
+                      font-size: 0.9em; 
+                      color: #7f8c8d; 
+                      border-top: 1px solid #eee; 
+                      padding-top: 10px; 
+                  }
+                  .booking-id {
+                      font-weight: bold;
+                      color: #2c3e50;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="header">
+                  <h2>Booking Cancellation Notification</h2>
+              </div>
+              
+              <div class="content">
+                  <p>Dear ${booking.userId?.name || "Customer"},</p>
+                  
+                  <p>We regret to inform you that your booking <span class="booking-id">#${booking._id.toString().slice(-6)}</span> has been cancelled because ${reason}.</p>
+                  
+                  <div class="refund">
+                      <h3>Refund Details</h3>
+                      <p><strong>Original Amount:</strong> ₹${booking.totalCost.toFixed(2)}</p>
+                      <p><strong>Refund Amount:</strong> ₹${refundAmount}</p>
+                      <p><strong>Processing Time:</strong> 5-7 business days</p>
+                      <p>The amount will be credited back to your original payment method.</p>
+                  </div>
+                  
+                  <p>We apologize for any inconvenience this may cause.</p>
+              </div>
+              
+              <div class="footer">
+                  <p>If you have any questions, please contact our support team.</p>
+                  <p><strong>The Take Outdoors Team</strong></p>
+              </div>
+          </body>
+          </html>`;
+};
+
+// Delete booking by userId
 const deleteBookingbyuserId = async (req, res) => {
   try {
     const deletebookingbyuserId = await BookingModel.findByIdAndDelete(
@@ -369,6 +542,6 @@ module.exports = {
   updateBooking,
   deleteBooking,
   checkDateAvailability,
-  deleteBookingbyhordingId,
+  deleteBookingsbyhordingId,
   deleteBookingbyuserId,
 };
