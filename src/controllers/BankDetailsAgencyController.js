@@ -32,7 +32,42 @@ const getBankDetailsbyuserId = async(req,res)=>{
     }
 }
 
+const getAllBankDetails = async(req, res) => {
+    try {
+        const allBankDetails = await bankdetailsagencyModel.find().populate("userId");
+        res.status(200).json({
+            message: "All bank details fetched successfully...",
+            data: allBankDetails
+        });
+    } catch(err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+};
+
+const updateBankDetails = async(req, res) => {
+    try {
+        const updatedDetails = await bankdetailsagencyModel.findOneAndUpdate(
+            { userId: req.params.userId },
+            req.body,
+            { new: true }
+        ).populate("userId");
+        
+        res.status(200).json({
+            message: "Bank details updated successfully...",
+            data: updatedDetails
+        });
+    } catch(err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+};
+
 module.exports = {
     addBankDetails,
-    getBankDetailsbyuserId
+    getBankDetailsbyuserId,
+    getAllBankDetails,
+    updateBankDetails
 }
