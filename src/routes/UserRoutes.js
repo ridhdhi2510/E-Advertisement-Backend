@@ -10,5 +10,7 @@ routes.post("/login",userController.loginUserWithToken)
 routes.post("/forgotpassword",userController.forgotPassword)
 routes.post("/resetpassword",userController.resetPassword)
 routes.put("/update/:id" ,userController.updateProfile )
+routes.get("/getbyrole/:roleId", userController.getAlluserbyrole);
+
 
 module.exports = routes

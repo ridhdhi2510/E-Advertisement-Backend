@@ -5,6 +5,78 @@ const mailUtil = require("../utils/MailUtil.js"); // Import mail utility
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
 const secret = "e-hoarding"
+const bookingModel = require("../models/BookingModel");
+const hordingModel = require("../models/HordingModel.js")
+
+    const getAlluserbyrole = async (req, res) => {
+    try {
+        const Role = await roleModel.findById(req.params.roleId);
+        if (!Role) {
+        return res.status(404).json({ message: "Role not found" });
+        }
+
+        const usersbyrole = await userModel.find({ roleId: Role._id });
+
+        if(Role.name == 'customer'){
+            const customerWithBookings = await Promise.all(
+                usersbyrole.map(async (customer) => {
+                    const bookings = await bookingModel.find({ userId: customer._id }).populate("hordingId");
+
+                    return {
+                    id: customer._id,
+                    name: customer.name,
+                    email: customer.email,
+                    phone: customer.phone || null,
+                    status: customer.status || "active", // use "active" or customize logic
+                    bookings: bookings.map(b => ({
+                        id: b._id,
+                        adName: b.adName,
+                        startDate: b.startDate,
+                        endDate: b.endDate,
+                        totalCost: b.totalCost,
+                        status: b.status,
+                        hoardingLocation: b.hordingId?.location || null, // customize this based on schema
+                    }))
+                    };
+                })
+            );
+            res.status(200).json({
+                message: "Customer User fetched successfully",
+                data: customerWithBookings
+            });
+        }
+        if(Role.name == 'agency'){
+            const agencyWithHordingsgs = await Promise.all(
+                usersbyrole.map(async (agency) => {
+                    const hordings = await hordingModel.find({ userId: agency._id }).populate("userId");
+
+                    return {
+                    id: agency._id,
+                    name: agency.name,
+                    email: agency.email,
+                    phone: agency.phone || null,
+                    status: agency.status || "active", // use "active" or customize logic
+                    hordings: hordings.map(h => ({
+                        id: h._id,
+                        hoardingDimension: h.hoardingDimension,
+                        hoardingType: h.hoardingType,
+                        hourlyRate: h.hourlyRate,
+                        latitude: h.latitude,
+                        longitude: h.longitude
+                    }))
+                    };
+                })
+            );
+            res.status(200).json({
+                message: "Agency User fetched successfully",
+                data: agencyWithHordingsgs
+            });
+        }
+    } catch (err) {
+    console.error("Error fetching Users:", err);
+        res.status(500).json({ message: err.message });
+    }
+    };
 
 const signup = async (req, res) => {
     try {
@@ -267,5 +339,6 @@ module.exports = {
     loginUserWithToken,
     forgotPassword,
     resetPassword,
-    updateProfile
+    updateProfile,
+    getAlluserbyrole
 }

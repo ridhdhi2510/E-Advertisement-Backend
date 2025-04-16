@@ -3,5 +3,7 @@ const bankdetailsagencyController = require("../controllers/BankDetailsAgencyCon
 
 routes.post("/add",bankdetailsagencyController.addBankDetails);
 routes.get("/getbyuserId/:userId",bankdetailsagencyController.getBankDetailsbyuserId);
+routes.get("/getall", bankdetailsagencyController.getAllBankDetails);
+routes.put("/update/:userId", bankdetailsagencyController.updateBankDetails);
 
 module.exports = routes;
