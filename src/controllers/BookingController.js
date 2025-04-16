@@ -14,48 +14,8 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage: storage }).single("adFile");
-// const addBooking = async (req, res) => {
-//   upload(req, res, async (err) => {
-//     if (err) {
-//       return res.status(500).json({ message: err.message });
-//     }
 
-//     try {
-//       const { adName, adDescription, startDate, endDate, totalCost, websiteProductUrl, userId, hordingId} = req.body;
-//       // const userId = req.headers["userid"];
-//       // const hordingId = req.headers["hordingid"];
-
-//       // if (!userId || !hordingId) {
-//       //   return res.status(400).json({ message: "User ID and Hoarding ID are required!" });
-//       // }
-
-//       let adFileUrl = null;
-//       if (req.file) {
-//         const cloudinaryResponse = await cloudinaryUtil.uploadFileToCloudinary(req.file);
-//         adFileUrl = cloudinaryResponse.secure_url;
-//       }
-//       if (!userId || !hordingId || !startDate || !endDate || !adName || !adDescription || !totalCost) {
-//         return res.status(400).json({ message: "Missing required booking fields" });
-//       }
-
-//       const newBooking = await BookingModel.create({
-//         hordingId,
-//         userId,
-//         adName,
-//         adDescription,
-//         adFile: adFileUrl,
-//         websiteProductUrl,
-//         startDate,
-//         endDate,
-//         totalCost,
-//       });
-
-//       res.status(201).json({ message: "Booking created successfully", data: newBooking });
-//     } catch (error) {
-//       res.status(500).json({ message: "Error adding booking", error: error.message });
-//     }
-//   });
-// };
+//Add Booking
 const addBooking = async (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -75,10 +35,10 @@ const addBooking = async (req, res) => {
         websiteProductUrl,
         userId,
         hordingId,
-        paymentId // ✅ FIXED typo from 'hordingId'
+        paymentId 
       } = req.body;
 
-      // ✅ Validate required fields
+      // Validate required fields
       if (
         !userId ||
         !hordingId ||
@@ -93,7 +53,7 @@ const addBooking = async (req, res) => {
         });
       }
 
-      // ✅ Upload to Cloudinary if file is present
+      // Upload to Cloudinary if file is present
       let adFileUrl = null;
       if (req.file) {
         const cloudinaryResponse = await cloudinaryUtil.uploadFileToCloudinary(
@@ -103,7 +63,7 @@ const addBooking = async (req, res) => {
         adFileUrl = cloudinaryResponse.secure_url;
       }
 
-      // ✅ Create booking in DB
+      // Create booking in DB
       const newBooking = await BookingModel.create({
         hordingId,
         userId,
@@ -117,14 +77,18 @@ const addBooking = async (req, res) => {
         paymentId
       });
 
+      
+      //Show new booking created at recent activity log
       try {
+        const user = await mongoose.model("users").findById(userId).select("name");
         await createActivity(
           'booking_created',
           userId,
-          userName, // Make sure this is available
+          user.name,
           newBooking._id,
-          `New booking created by ${userName}`
+          `New booking created by ${user.name}`
         );
+        
       } catch (error) {
         console.error('Error while creating activity for booking creation:', error);
       }
@@ -204,6 +168,21 @@ const updateBooking = async (req, res) => {
     if (!updatedBooking) {
       return res.status(404).json({ message: "Booking not found" });
     }
+
+    //Show upddate booking at recent activity log
+    try {
+      const user = await mongoose.model("users").findById(updatedBooking.userId).select("name");
+      await createActivity(
+        'booking_updated',
+        updatedBooking.userId,
+        user.name,
+        updatedBooking._id,
+        `Booking updated by ${user.name}`
+      );
+    } catch (activityErr) {
+      console.error("Failed to log booking update activity:", activityErr);
+    }
+
     res
       .status(200)
       .json({ message: "Booking updated successfully", data: updatedBooking });
@@ -219,7 +198,7 @@ const deleteBooking = async (req, res) => {
   try {
     // Find the booking with user data
     const booking = await BookingModel.findById(req.params.id)
-      .populate("userId", "email") // Only get user's email
+      .populate("userId", "email name _id") // Only get user's email
       .exec();
 
       const refundamount=((booking.totalCost)/2)
@@ -375,6 +354,14 @@ const deleteBookingsbyhordingId = async (hoardingId) => {
           const paymentstatusResult = await updatePaymentRefund(booking.paymentId,booking.totalCost);
           console.log('Booking cancellation result:', paymentstatusResult);
 
+          await createActivity(
+            'booking_cancelled',
+            booking.userId._id,
+            booking.userId.name,
+            booking._id,
+            `Booking cancelled due to hoarding removal by ${booking.userId.name}`
+          );
+
           await BookingModel.deleteOne({ _id: booking._id });
 
           return {
@@ -487,19 +474,42 @@ const createCancellationEmail = (booking, refundAmount, isHoardingDeleted = fals
 // Delete booking by userId
 const deleteBookingbyuserId = async (req, res) => {
   try {
-    const deletebookingbyuserId = await BookingModel.findByIdAndDelete(
-      req.params.userId
-    );
-    if (!deletebookingbyuserId) {
+    // Step 1: Find the booking and populate user info
+    const booking = await BookingModel.findById(req.params.userId)
+      .populate("userId", "name email")
+      .exec();
+
+    if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
-    res.status(200).json({ message: "Booking deleted successfully" });
+
+    // Step 2: Log activity before deletion
+    try {
+      await createActivity(
+        "booking_deleted",
+        booking.userId._id,
+        booking.userId.name,
+        booking._id,
+        `Booking deleted by ${booking.userId.name}`
+      );
+    } catch (activityErr) {
+      console.error("Error logging activity:", activityErr);
+    }
+
+    // Step 3: Delete the booking
+    await BookingModel.deleteOne({ _id: req.params.userId });
+
+    return res.status(200).json({
+      message: "Booking deleted successfully",
+    });
   } catch (err) {
-    res.status(500).json({
+    console.error("Error deleting booking:", err);
+    return res.status(500).json({
       message: err.message,
     });
   }
 };
+
 
 //date availability
 const checkDateAvailability = async (req, res) => {

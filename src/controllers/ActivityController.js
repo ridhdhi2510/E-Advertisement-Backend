@@ -6,7 +6,7 @@ const getRecentActivities = async (req, res) => {
   try {
     const activities = await ActivityModel.find()
       .sort({ createdAt: -1 })
-      .limit(10);
+      .limit(5);
     
     res.status(200).json({
       message: "Recent activities fetched successfully",

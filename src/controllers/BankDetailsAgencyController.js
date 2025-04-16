@@ -1,10 +1,6 @@
 const bankdetailsagencyModel = require("../models/BankDetailsAgencyModel");
 
-//add
-//getall
-//getbyid
-//getbyuserId
-
+//Add Bank Details
 const addBankDetails = async(req,res)=>{
     try{
         const creatBankDetails = await bankdetailsagencyModel.create(req.body);
@@ -20,6 +16,7 @@ const addBankDetails = async(req,res)=>{
     }
 }
 
+//Get Bank Details By User Id
 const getBankDetailsbyuserId = async(req,res)=>{
     try{
         const showBankDetails = await bankdetailsagencyModel.findOne({ userId: req.params.userId }).populate("userId");

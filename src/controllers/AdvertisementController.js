@@ -3,11 +3,6 @@ const multer = require("multer");
 const path = require("path");
 const cloudinaryUtil = require("../utils/CloudnaryUtil");
 
-//add
-//addwithfile
-//getall
-//getallbyuserId
-
 // //storage engine
 const storage = multer.diskStorage({
   // destination: "./uploads",

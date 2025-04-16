@@ -6,7 +6,14 @@ const activitySchema = new Schema({
   type: {
     type: String,
     required: true,
-    enum: ['signup', 'hording_added', 'hording_updated', 'booking_created', 'booking_cancelled']
+    enum: ['signup',
+          'hording_added',
+          'hording_updated',
+          'hording_deleted',
+          'booking_created',
+          'booking_updated',
+          'booking_cancelled',
+          'booking_deleted']
   },
   userId: {
     type: Schema.Types.ObjectId,

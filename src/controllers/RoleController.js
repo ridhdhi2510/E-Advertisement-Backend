@@ -41,8 +41,6 @@ const getRoleByName  = async(req , res) => {
     })
 }
 
-
-//object export 
 module.exports = {
     getAllRoles,addRole,deleteRole,getRoleById , getRoleByName
 }

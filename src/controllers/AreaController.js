@@ -1,5 +1,7 @@
 const areaModel = require("../models/AreaModel");
 
+
+//Add area
 const addArea = async (req, res) => {
   try {
     const savedArea = await areaModel.create(req.body);
@@ -11,6 +13,8 @@ const addArea = async (req, res) => {
     res.status(500).json({ message: err });
   }
 };
+
+//Get Area
 const getAreas = async (req, res) => {
   try {
     const areas = await areaModel.find().populate("cityId").populate("stateId");
@@ -23,6 +27,7 @@ const getAreas = async (req, res) => {
   }
 };
 
+//Get Area By CityID
 const getAreaBycityId = async (req, res) => {
   try {
     const areas = await areaModel.find({ cityId: req.params.cityId });

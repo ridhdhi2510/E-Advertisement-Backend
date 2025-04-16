@@ -1,10 +1,7 @@
 
 const paymentModel = require("../models/PaymentModel");
 
-//add post
-//getall
-//get by id
-//get by user id
+//Add Payment
 const addPayment = async (req, res) => {
     try {
       const { userId, amount, paymentStatus, transactionId, bookingId } = req.body;
@@ -49,6 +46,7 @@ const addPayment = async (req, res) => {
     }
   };
 
+  //Get All Payment
 const getAllPayments = async (req, res) => {
   try {
     const showPayments = await paymentModel.find().populate("bookingId userId");
@@ -69,6 +67,7 @@ const getAllPayments = async (req, res) => {
   }
 };
 
+//Get APyment By Id
 const getPaymentById = async (req, res) => {
   try {
     const showPaymentsbyId = await paymentModel
@@ -91,6 +90,7 @@ const getPaymentById = async (req, res) => {
   }
 };
 
+//Get Payments By UserId
 const getAllPaymentsByUserId = async (req, res) => {
   try {
     const showPaymentsbyUserId = await paymentModel
@@ -167,8 +167,6 @@ const updatePayment = async (req, res) => {
     };
   }
  }
-
-
 
 module.exports = {
   addPayment,

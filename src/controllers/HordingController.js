@@ -7,6 +7,7 @@ const { deleteBookingsbyhordingId } = require("../controllers/BookingController"
 
 const cloudinaryUtil = require("../utils/CloudnaryUtil.js");
 const { createActivity } = require('./ActivityController');
+const UserModel = require("../models/UserModel.js");
 
 // //storage engine
 const storage = multer.diskStorage({
@@ -73,35 +74,7 @@ const getAllHordingsByUserId = async (req, res) => {
   }
 }
 
-
-//add hording with file
-// const addHordingWithFile = async (req, res) => {
-//   upload(req, res, async (err) => {
-//     if (err) {
-//       res.status(500).json({
-//         message: err.message,
-//       });
-//     } 
-
-//     else {
-//       // database data store
-//       //cloundinary
-
-//       const cloundinaryResponse = await cloudinaryUtil.uploadFileToCloudinary(req.file);
-//       console.log(cloundinaryResponse);
-//       console.log(req.body);
-
-//       //store data in database
-//       req.body.hordingURL = cloundinaryResponse.secure_url
-//       const savedHording = await hordingModel.create(req.body);
-
-//       res.status(200).json({
-//         message: "hording saved successfully",
-//         data: savedHording
-//       });
-//     }
-//   });
-// };
+//Add Hording with file
 const addHordingWithFile = async (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -130,13 +103,15 @@ const addHordingWithFile = async (req, res) => {
       // Save hording data to the database
       const savedHording = await hordingModel.create(req.body);
 
+      
       try {
+        const user = await UserModel.findById(req.body.userId).select("name");
         await createActivity(
           'hording_added',
           req.body.userId,
-          req.body.userName, // You'll need to pass this or fetch it
+          user.name,
           savedHording._id,
-          `New hoarding added by ${req.body.userName}`
+          `New hoarding added by ${user.name}`
         );
       } catch (activityError) {
         console.error('Failed to log hoarding added activity:', activityError);
@@ -157,7 +132,7 @@ const addHordingWithFile = async (req, res) => {
     };
 
 
-    //update hording
+//update hording
 const updateHording = async (req, res) => {
   //update tablename set  ? where id = ?
   //update new data -->req.body
@@ -171,13 +146,15 @@ const updateHording = async (req, res) => {
     );
 
     // Log activity
+    
     try {
+      const user = await UserModel.findById(req.body.userId).select("name");
       await createActivity(
         'hording_updated',
         req.body.userId,
-        req.body.userId?.name,
+        user.name,
         req.params.id,
-        `Hoarding updated by ${req.body.userName}`
+        `Hoarding updated by ${user.name}`
       );
     } catch (activityError) {
       console.error('Activity logging failed:', activityError);
@@ -248,9 +225,28 @@ const deleteHording = async(req,res) => {
     const hording = await hordingModel.findById(hoardingId)
           .populate("userId", "email name") // Only get user's email
           .exec()
+
+          // Log the deletion activity BEFORE deleting
+      try {
+        const activity = await createActivity(
+          'hording_deleted',
+          hording.userId._id,
+          hording.userId.name,
+          hoardingId,
+          `Hoarding deleted by ${hording.userId.name}`
+        );
+        console.log("Hoarding deletion activity logged:", activity);
+      } catch (activityError) {
+        console.error('Failed to log deleted hoarding activity:', activityError);
+      }
+
+
     // First cancel all associated bookings
     const cancellationResult = await deleteBookingsbyhordingId(hoardingId);
     console.log('Booking cancellation result:', cancellationResult);
+
+
+    
 
     // Then delete the hoarding
     const deletedHoarding = await hordingModel.findByIdAndDelete(hoardingId);

@@ -39,8 +39,8 @@ const bankdetailsagencyRoutes = require("./src/routes/BankDetailsAgencyRoutes");
 app.use("/bankdetailsagency",bankdetailsagencyRoutes);
 
 // Add this with other route imports
-// const agencyRoutes = require("./src/routes/AgencyRoutes");
-// app.use("/agency", agencyRoutes);
+const agencyRoutes = require("./src/routes/AgencyRoutes");
+app.use("/agency", agencyRoutes);
  
 // In your main server file (e.g., app.js or server.js)
 const stripeRoutes = require('./src/routes/StripePayRoutes');
