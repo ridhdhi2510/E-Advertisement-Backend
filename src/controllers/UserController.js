@@ -23,13 +23,13 @@ const hordingModel = require("../models/HordingModel.js")
                     const bookings = await bookingModel.find({ userId: customer._id }).populate("hordingId");
 
                     return {
-                    id: customer._id,
+                    _id: customer._id,
                     name: customer.name,
                     email: customer.email,
                     phone: customer.phone || null,
                     status: customer.status || "active", // use "active" or customize logic
                     bookings: bookings.map(b => ({
-                        id: b._id,
+                        _id: b._id,
                         adName: b.adName,
                         startDate: b.startDate,
                         endDate: b.endDate,
@@ -51,13 +51,13 @@ const hordingModel = require("../models/HordingModel.js")
                     const hordings = await hordingModel.find({ userId: agency._id }).populate("userId");
 
                     return {
-                    id: agency._id,
+                    _id: agency._id,
                     name: agency.name,
                     email: agency.email,
                     phone: agency.phone || null,
                     status: agency.status || "active", // use "active" or customize logic
                     hordings: hordings.map(h => ({
-                        id: h._id,
+                        _id: h._id,
                         hoardingDimension: h.hoardingDimension,
                         hoardingType: h.hoardingType,
                         hourlyRate: h.hourlyRate,

@@ -111,7 +111,7 @@ const addBooking = async (req, res) => {
 // Get all bookings
 const getAllBookings = async (req, res) => {
   try {
-    const bookings = await BookingModel.find().populate("hordingId userId");
+    const bookings = await BookingModel.find().populate("hordingId userId paymentId");
     res
       .status(200)
       .json({ message: "Bookings fetched successfully", data: bookings });

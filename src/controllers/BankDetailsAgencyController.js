@@ -19,7 +19,7 @@ const addBankDetails = async(req,res)=>{
 //Get Bank Details By User Id
 const getBankDetailsbyuserId = async(req,res)=>{
     try{
-        const showBankDetails = await bankdetailsagencyModel.findOne({ userId: req.params.userId }).populate("userId");
+        const showBankDetails = await bankdetailsagencyModel.findOne({ userId: req.params.userId }).populate("userId","name email");
         res.status(200).json({
             message: "Bank details of agency fetched successfully...",
             data: showBankDetails
@@ -35,6 +35,10 @@ const getBankDetailsbyuserId = async(req,res)=>{
 const getAllBankDetails = async(req, res) => {
     try {
         const allBankDetails = await bankdetailsagencyModel.find().populate("userId");
+        // const allBankDetails = await bankdetailsagencyModel.find().populate({
+        //     path:"userId",
+        //     select: 'name email'
+        // })
         res.status(200).json({
             message: "All bank details fetched successfully...",
             data: allBankDetails
